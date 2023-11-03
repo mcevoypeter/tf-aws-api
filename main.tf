@@ -46,7 +46,7 @@ resource "aws_lambda_permission" "apigw_trigger" {
     for idx, route in var.routes : route.key => route
   }
 
-  statement_id  = "AllowExecutionFromAPIGateway"
+  statement_id  = "AllowExecutionFromAPIGateway-${var.name}"
   action        = "lambda:InvokeFunction"
   function_name = each.value.function_name
   principal     = "apigateway.amazonaws.com"
