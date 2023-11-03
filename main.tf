@@ -12,8 +12,9 @@ provider "aws" {
 }
 
 resource "aws_apigatewayv2_api" "this" {
-  name          = var.name
-  protocol_type = var.protocol_type
+  name                       = var.name
+  protocol_type              = var.protocol_type
+  route_selection_expression = var.protocol_type == "WEBSOCKET" ? "$request.body.action" : "$request.method $request.path"
 }
 
 resource "aws_apigatewayv2_stage" "this" {
