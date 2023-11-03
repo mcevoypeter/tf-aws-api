@@ -11,28 +11,6 @@ provider "aws" {
   region = var.region
 }
 
-data "aws_iam_policy_document" "allow_cloudwatch_access_from_apigw" {
-  statement {
-    effect = "Allow"
-    principals {
-      type        = "Service"
-      identifiers = ["apigateway.amazonaws.com"]
-    }
-    actions = ["sts:AssumeRole"]
-  }
-}
-
-resource "aws_iam_role" "logger" {
-  name                = "APIGatewayLogger"
-  assume_role_policy  = data.aws_iam_policy_document.allow_cloudwatch_access_from_apigw.json
-  managed_policy_arns = ["arn:aws:iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs"]
-}
-
-# Enable API Gateway to write logs to CloudWatch.
-resource "aws_api_gateway_account" "this" {
-  cloudwatch_role_arn = aws_iam_role.logger.arn
-}
-
 resource "aws_apigatewayv2_api" "this" {
   name          = var.name
   protocol_type = var.protocol_type
