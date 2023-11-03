@@ -50,8 +50,8 @@ resource "aws_iam_role" "lambda" {
               "execute-api:InvalidateCache",
           ],
           Resource = # ARN with format `arn:aws:execute-api:${Region}:${Account}:${ApiId}/${Stage}/${Method}/${ApiSpecificResourcePath}`
-		}
-	  ] 
+        }
+      ]
     })
   }
 }
