@@ -22,7 +22,12 @@ variable "stages" {
 variable "routes" {
   description = "API routes"
   type = set(object({
-    # Route key i.e. `GET /a/b/{id}`.
+    # Route key. A valid HTTP route key is of the form `<http_method> <path>`
+    # i.e. `GET /a/{id}`. A valid WebSocket route key is of the form `<action>`
+    # i.e. `update`. For more on HTTP route keys, see
+    # https://docs.aws.amazon.com/apigateway/latest/developerguide/http-api-develop-routes.html.
+    # For more on WebSocket route keys, see
+    # https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-websocket-api-routes-integrations.html.
     key = string
     # Name of Lambda function that handles the route.
     function_name = string
