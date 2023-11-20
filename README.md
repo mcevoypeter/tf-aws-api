@@ -6,58 +6,7 @@ This [Terraform] module creates an [AWS] [API Gateway] API. It supports both [HT
 
 ### [Lambda]
 
-This module does not handle the creation of [Lambda] functions. Before creating an API with this module, ensure all [Lambda] functions and their corresponding [IAM] roles have been created. For example, the following creates a [Lambda] function `example-handler` written in JavaScript sourced from the `example-bucket` [S3] bucket:
-
-```terraform
-resource "aws_lambda_function" "example" {
-  s3_bucket     = "example-bucket"
-  s3_key        = "example-handler.zip"
-  function_name = "example-handler"
-  runtime       = "nodejs"
-  handler       = "handler"
-}
-
-data "aws_iam_policy_document" "lambda_assume_role" {
-  statement {
-    effect = "Allow"
-    principals {
-      type        = "Service"
-      identifiers = ["lambda.amazonaws.com"]
-    }
-    actions = ["sts:AssumeRole"]
-  }
-}
-
-resource "aws_iam_role" "lambda" {
-  name                = "Lambda-${aws_lambda_function.example.function_name}"
-  assume_role_policy  = data.aws_iam_policy_document.lambda_assume_role.json
-  managed_policy_arns = [
-    # permissions required to invoke the function
-    "arn:aws:iam::aws:policy/service-role/AWSLambdaRole",
-    # permissions required to write logs to CloudWatch
-    "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
-  ]
-  inline_policy {
-    name   = "ExecuteAPIFullAccess"
-    policy = jsonencode({
-      Version = "2012-10-17"
-	  Statement = [
-		{
-          Effect = "Allow"
-          Action = [
-              "execute-api:Invoke",
-              "execute-api:ManageConnections",
-              "execute-api:InvalidateCache",
-          ],
-          Resource = # ARN with format `arn:aws:execute-api:${Region}:${Account}:${ApiId}/${Stage}/${Method}/${ApiSpecificResourcePath}`
-        }
-      ]
-    })
-  }
-}
-```
-
-**Note:** the `ExecuteAPIFullAccess` inline policy in the code snippet above is only necessary for [WebSocket APIs][ws-api] that use [`@connections` callbacks](https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-how-to-call-websocket-api-connections.html) to send responses to conncted clients. Otherwise, it can be ommitted.
+This module does not handle the creation of [Lambda] functions. Before creating an API with this module, ensure all [Lambda] functions and their corresponding [IAM] roles have been created using the [tf-aws-lambda] [Terraform] module.
 
 ### [CloudWatch] Logging
 
@@ -184,4 +133,5 @@ wscat --connect https://<api_id>.execute-api.us-west-1.amazonaws.com/v0/
 [Lambda]: https://aws.amazon.com/lambda/
 [S3]: https://aws.amazon.com/s3/
 [Terraform]: https://www.terraform.io/
+[tf-aws-lambda]: https://github.com/palm-drive/tf-aws-lambda
 [ws-api]: https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-websocket-api.html
