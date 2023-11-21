@@ -68,7 +68,7 @@ resource "aws_lambda_function" "this" {
 
 resource "aws_lambda_permission" "apigw_trigger" {
   for_each = {
-    for idx, route in var.routes : route.key => route
+    for idx, route in var.routes : route.route_key => route
   }
 
   statement_id  = "AllowExecutionFromAPIGateway-${var.name}"
@@ -80,7 +80,7 @@ resource "aws_lambda_permission" "apigw_trigger" {
 
 resource "aws_apigatewayv2_integration" "this" {
   for_each = {
-    for idx, route in var.routes : route.key => route
+    for idx, route in var.routes : route.route_key => route
   }
 
   api_id = aws_apigatewayv2_api.this.id
@@ -92,7 +92,7 @@ resource "aws_apigatewayv2_integration" "this" {
 
 resource "aws_apigatewayv2_route" "this" {
   for_each = {
-    for idx, route in var.routes : route.key => route
+    for idx, route in var.routes : route.route_key => route
   }
 
   api_id    = aws_apigatewayv2_api.this.id
