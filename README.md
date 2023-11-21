@@ -4,10 +4,6 @@ This [Terraform] module creates an [AWS] [API Gateway] API. It supports both [HT
 
 ## Prequisites
 
-### [Lambda]
-
-This module does not handle the creation of [Lambda] functions. Before creating an API with this module, ensure all [Lambda] functions and their corresponding [IAM] roles have been created using the [tf-aws-lambda] [Terraform] module.
-
 ### [CloudWatch] Logging
 
 To enable the API to write [execution logs](https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-logging.html) to [CloudWatch], the [AWS] account in which the API is deployed needs an [IAM] role that grants [API Gateway] push access to [CloudWatch], and [API Gateway] needs to be configured with the [ARN] of that [IAM] role. Because [CloudWatch] logging from [API Gateway] is configured at the level of an [AWS] account, not an API, it's omitted from this module.
@@ -63,19 +59,22 @@ module "http_api" {
   stages        = ["v0"]
   routes = [
     {
-      key           = "POST /user"
-      function-name = "add-user"
-      invoke_arn    = "arn:aws:lambda:us-east-2:012345678901:function:add-user"
+      route_key     = "POST /user"
+      s3_key        = "add-user.zip"
+      function_name = "add-user"
+      runtime       = "nodejs20.x"
     },
     {
       key           = "GET /user/{id}"
+      s3_key        = "get-user.zip"
       function_name = "get-user"
-      invoke_arn    = "arn:aws:lambda:us-east-2:012345678901:function:get-user"
+      runtime       = "nodejs20.x"
     },
     {
       key           = "DELETE /user/{id}"
+      s3_key        = "remove-user.zip"
       function_name = "remove-user"
-      invoke_arn    = "arn:aws:lambda:us-east-2:012345678901:function:remove-user"
+      runtime       = "nodejs20.x"
     },
   ]
 }
@@ -89,7 +88,7 @@ curl https://<api_id>.execute-api.us-east-2.amazonaws.com/v0/user/<user_id>
 
 ### [WebSocket][ws-api]
 
-The following use of this module creates a [WebSocket API][ws-api] named `example_ws` in `us-west-1` with stages (`v0` and `v1`) and routes `$default` (the default route) and `info`.
+The following use of this module creates a [WebSocket API][ws-api] named `example_ws` in `us-west-1` with stages (`v0` and `v1`) and routes `$default` (the default route) and `info`, each connected to a single [Lambda] function.
 
 ```terraform
 module "ws_api" {
@@ -101,13 +100,15 @@ module "ws_api" {
   routes = [
     {
       key           = "$default"
+      s3_key        = "default-handler.zip"
       function_name = "default-handler"
-      invoke_arn    = "arn:aws:lambda:us-east-2:828118291497:function:default-handler"
+      runtime       = "nodejs20.x"
     },
     {
       key           = "info"
+      s3_key        = "info-handler.zip"
       function_name = "info-handler"
-      invoke_arn    = "arn:aws:lambda:us-east-2:828118291497:function:info-handler"
+      runtime       = "nodejs20.x"
     },
   ]
 
@@ -133,5 +134,4 @@ wscat --connect https://<api_id>.execute-api.us-west-1.amazonaws.com/v0/
 [Lambda]: https://aws.amazon.com/lambda/
 [S3]: https://aws.amazon.com/s3/
 [Terraform]: https://www.terraform.io/
-[tf-aws-lambda]: https://github.com/palm-drive/tf-aws-lambda
 [ws-api]: https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-websocket-api.html

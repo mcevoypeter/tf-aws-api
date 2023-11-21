@@ -13,6 +13,11 @@ variable "stages" {
   type        = set(string)
 }
 
+variable "functions_s3_bucket" {
+  description = "S3 bucket containing Lambda route handlers"
+  type        = string
+}
+
 variable "routes" {
   description = "API routes"
   type = set(object({
@@ -22,10 +27,20 @@ variable "routes" {
     # https://docs.aws.amazon.com/apigateway/latest/developerguide/http-api-develop-routes.html.
     # For more on WebSocket route keys, see
     # https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-websocket-api-routes-integrations.html.
-    key = string
-    # Name of Lambda function that handles the route.
+    route_key = string
+    # Key of Lambda route handler in functions_s3_bucket. See
+    # https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_function#s3_key.
+    s3_key = string
+    # Name of Lambda route handler created from s3_key. The function entrypoint
+    # MUST be named `handler`.
     function_name = string
-    # Invocation ARN of the route-handling Lambda function.
-    invoke_arn = string
+    # Runtime of Lambda route handler. See
+    # https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_function#runtime.
+    runtime = string
+    # ARNs of permission policies to grant to the Lambda route handler.
+    policy_arns = list(string)
+    # Inline policies to grant to the Lambda route handler. See
+    # https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role#inline_policy.
+    inline_policies = set(object({ name = string, policy = string }))
   }))
 }
