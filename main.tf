@@ -17,7 +17,7 @@ resource "aws_apigatewayv2_stage" "this" {
   }
   dynamic "route_settings" {
     for_each = {
-      for idx, route in var.routes : route.key => route
+      for idx, route in var.routes : route.route_key => route
     }
     content {
       route_key              = route_settings.key
