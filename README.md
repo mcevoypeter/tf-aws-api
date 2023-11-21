@@ -59,22 +59,28 @@ module "http_api" {
   stages        = ["v0"]
   routes = [
     {
-      route_key     = "POST /user"
-      s3_key        = "add-user.zip"
-      function_name = "add-user"
-      runtime       = "nodejs20.x"
+      route_key       = "POST /user"
+      s3_key          = "add-user.zip"
+      function_name   = "add-user"
+      runtime         = "nodejs20.x"
+      policy_arns     = []
+      inline_policies = []
     },
     {
-      key           = "GET /user/{id}"
-      s3_key        = "get-user.zip"
-      function_name = "get-user"
-      runtime       = "nodejs20.x"
+      key             = "GET /user/{id}"
+      s3_key          = "get-user.zip"
+      function_name   = "get-user"
+      runtime         = "nodejs20.x"
+      policy_arns     = []
+      inline_policies = []
     },
     {
-      key           = "DELETE /user/{id}"
-      s3_key        = "remove-user.zip"
-      function_name = "remove-user"
-      runtime       = "nodejs20.x"
+      key             = "DELETE /user/{id}"
+      s3_key          = "remove-user.zip"
+      function_name   = "remove-user"
+      runtime         = "nodejs20.x"
+      policy_arns     = []
+      inline_policies = []
     },
   ]
 }
@@ -99,16 +105,20 @@ module "ws_api" {
   stages        = ["v0", "v1"]
   routes = [
     {
-      key           = "$default"
-      s3_key        = "default-handler.zip"
-      function_name = "default-handler"
-      runtime       = "nodejs20.x"
+      key             = "$default"
+      s3_key          = "default-handler.zip"
+      function_name   = "default-handler"
+      runtime         = "nodejs20.x"
+      policy_arns     = []
+      inline_policies = []
     },
     {
-      key           = "info"
-      s3_key        = "info-handler.zip"
-      function_name = "info-handler"
-      runtime       = "nodejs20.x"
+      key             = "info"
+      s3_key          = "info-handler.zip"
+      function_name   = "info-handler"
+      runtime         = "nodejs20.x"
+      policy_arns     = []
+      inline_policies = []
     },
   ]
 
