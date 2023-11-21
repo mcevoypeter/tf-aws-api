@@ -61,7 +61,7 @@ resource "aws_lambda_function" "this" {
   s3_key        = each.value.s3_key
   function_name = each.value.function_name
   runtime       = each.value.runtime
-  handler       = "handler"
+  handler       = each.value.handler
   role          = aws_iam_role.this[each.key].arn
 }
 

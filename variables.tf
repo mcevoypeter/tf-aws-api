@@ -37,6 +37,10 @@ variable "routes" {
     # Runtime of Lambda route handler. See
     # https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_function#runtime.
     runtime = string
+    # Handler name. For JavaScript and TypeScript handlers, this is
+    # `<module>.<handler>` i.e. `example.handler` for a handler named `handler`
+    # defined in a file `example.ts`.
+    handler = string
     # ARNs of permission policies to grant to the Lambda route handler.
     policy_arns = list(string)
     # Inline policies to grant to the Lambda route handler. See
