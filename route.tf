@@ -57,8 +57,9 @@ data "aws_s3_object" "this" {
     for idx, route in var.routes : route.route_key => route
   }
 
-  bucket = var.functions_s3_bucket
-  key    = each.value.s3_key
+  bucket        = var.functions_s3_bucket
+  key           = each.value.s3_key
+  checksum_mode = "ENABLED"
 }
 
 resource "aws_lambda_function" "this" {
