@@ -87,7 +87,7 @@ resource "aws_apigatewayv2_integration" "this" {
   integration_type       = "AWS_PROXY"
   connection_type        = "INTERNET"
   integration_uri        = aws_lambda_function.this[each.key].invoke_arn
-  payload_format_version = "2.0"
+  payload_format_version = route.payload_format_version
 }
 
 resource "aws_apigatewayv2_route" "this" {

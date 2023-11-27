@@ -41,6 +41,10 @@ variable "routes" {
     # `<module>.<handler>` i.e. `example.handler` for a handler named `handler`
     # defined in a file `example.ts`.
     handler = string
+    # Format of the payload sent to the Lambda route handler. Must be either `1.0`
+    # or `2.0` for HTTP APIs and `1.0` for WebSocket APIs (see
+    # https://github.com/hashicorp/terraform-provider-aws/issues/25280).
+    payload_format_version = string
     # ARNs of permission policies to grant to the Lambda route handler.
     policy_arns = list(string)
     # Inline policies to grant to the Lambda route handler. See
