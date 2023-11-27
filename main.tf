@@ -26,4 +26,8 @@ resource "aws_apigatewayv2_stage" "this" {
       throttling_rate_limit  = 10000
     }
   }
+
+  # All stages implicitly depend on all routes. This `depends_on` argument makes
+  # that dependency explicit to Terraform.
+  depends_on = [aws_apigatewayv2_api.this]
 }
