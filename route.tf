@@ -52,17 +52,27 @@ resource "aws_iam_role" "this" {
   }
 }
 
+data "aws_s3_object" "this" {
+  for_each = {
+    for idx, route in var.routes : route.route_key => route
+  }
+
+  bucket = var.functions_s3_bucket
+  key    = each.value.s3_key
+}
+
 resource "aws_lambda_function" "this" {
   for_each = {
     for idx, route in var.routes : route.route_key => route
   }
 
-  s3_bucket     = var.functions_s3_bucket
-  s3_key        = each.value.s3_key
-  function_name = each.value.function_name
-  runtime       = each.value.runtime
-  handler       = each.value.handler
-  role          = aws_iam_role.this[each.key].arn
+  s3_bucket        = var.functions_s3_bucket
+  s3_key           = each.value.s3_key
+  function_name    = each.value.function_name
+  runtime          = each.value.runtime
+  handler          = each.value.handler
+  source_code_hash = data.aws_s3_object.this[each.key]
+  role             = aws_iam_role.this[each.key].arn
 }
 
 resource "aws_lambda_permission" "apigw_trigger" {
