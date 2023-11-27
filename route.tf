@@ -71,7 +71,7 @@ resource "aws_lambda_function" "this" {
   function_name    = each.value.function_name
   runtime          = each.value.runtime
   handler          = each.value.handler
-  source_code_hash = data.aws_s3_object.this[each.key]
+  source_code_hash = data.aws_s3_object.this[each.key].checksum_sha256
   role             = aws_iam_role.this[each.key].arn
 }
 
