@@ -63,7 +63,7 @@ module "http_api" {
       s3_key          = "add-user.zip"
       function_name   = "add-user"
       runtime         = "nodejs20.x"
-      handler         = "add-user.handler"
+      handler         = "handler"
       policy_arns     = []
       inline_policies = []
     },
@@ -72,7 +72,7 @@ module "http_api" {
       s3_key          = "get-user.zip"
       function_name   = "get-user"
       runtime         = "nodejs20.x"
-      handler         = "get-user.handler"
+      handler         = "handler"
       policy_arns     = []
       inline_policies = []
     },
@@ -80,7 +80,7 @@ module "http_api" {
       key             = "DELETE /user/{id}"
       s3_key          = "remove-user.zip"
       function_name   = "remove-user"
-      handler         = "remove-user.handler"
+      handler         = "handler"
       runtime         = "nodejs20.x"
       policy_arns     = []
       inline_policies = []
