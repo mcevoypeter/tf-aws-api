@@ -1,6 +1,6 @@
 # [AWS] [API Gateway]
 
-This [Terraform] module creates an [AWS] [API Gateway] API. It supports both [HTTP][http-api] and [WebSocket][ws-api] APIs. For both API types, it uses [payload format version 2.0](https://docs.aws.amazon.com/apigateway/latest/developerguide/http-api-develop-integrations-lambda.html#http-api-develop-integrations-lambda.proxy-format).
+This [Terraform] module creates an [AWS] [API Gateway] API and [AWS] [Lambda]-handled routes.
 
 ## Prequisites
 
