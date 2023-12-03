@@ -57,7 +57,7 @@ data "aws_s3_object" "this" {
     for idx, route in var.routes : route.route_key => route
   }
 
-  bucket        = var.functions_s3_bucket
+  bucket        = var.handlers_s3_bucket
   key           = each.value.s3_key
 }
 
@@ -66,7 +66,7 @@ resource "aws_lambda_function" "this" {
     for idx, route in var.routes : route.route_key => route
   }
 
-  s3_bucket        = var.functions_s3_bucket
+  s3_bucket        = var.handlers_s3_bucket
   s3_key           = each.value.s3_key
   function_name    = each.value.function_name
   runtime          = each.value.runtime

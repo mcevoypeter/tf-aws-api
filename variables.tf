@@ -13,7 +13,7 @@ variable "stages" {
   type        = set(string)
 }
 
-variable "functions_s3_bucket" {
+variable "handlers_s3_bucket" {
   description = "S3 bucket containing Lambda route handlers"
   type        = string
 }
