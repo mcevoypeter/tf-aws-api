@@ -59,6 +59,7 @@ data "aws_s3_object" "this" {
 
   bucket        = var.handlers_s3_bucket
   key           = each.value.s3_key
+  checksum_mode = "ENABLED"
 }
 
 resource "aws_lambda_function" "this" {
@@ -71,8 +72,7 @@ resource "aws_lambda_function" "this" {
   function_name    = each.value.function_name
   runtime          = each.value.runtime
   handler          = each.value.handler
-  # The ETag is the MD5 checksum of the S3 object.
-  source_code_hash = base64sha256(data.aws_s3_object.this[each.key].etag)
+  source_code_hash = data.aws_s3_object.this[each.key].checksum_sha256
   role             = aws_iam_role.this[each.key].arn
 }
 
