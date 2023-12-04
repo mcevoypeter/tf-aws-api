@@ -15,17 +15,6 @@ resource "aws_apigatewayv2_stage" "this" {
     throttling_burst_limit = 5000
     throttling_rate_limit  = 10000
   }
-  dynamic "route_settings" {
-    for_each = {
-      for idx, route in var.routes : route.route_key => route
-    }
-    content {
-      route_key              = route_settings.key
-      logging_level          = "INFO"
-      throttling_burst_limit = 5000
-      throttling_rate_limit  = 10000
-    }
-  }
 
   # All stages implicitly depend on all routes. This `depends_on` argument makes
   # that dependency explicit to Terraform.
