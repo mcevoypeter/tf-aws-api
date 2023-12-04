@@ -44,6 +44,28 @@ See [`variables.tf`](variables.tf).
 
 See [`output.tf`](output.tf).
 
+## Deploying Source Code Zip Archives
+
+When uploading a source code zip archive to the [S3] bucket that hosts the API's route handlers, the SHA256 checksum of the zip archive **must** be supplied so that [Terraform] can properly track changes made to each route handlers source code and redeploy the corresponding [Lambda]s as necessary. To do so, use the [`aws s3api put-object`](https://docs.aws.amazon.com/AmazonS3/latest/userguide/checking-object-integrity.html) of the [AWS CLI]:
+
+```console
+aws s3api put-object \
+    --bucket <bucket> \
+    --key <object_key> \
+    --body <path_to_deployment_archive> \
+    --checksum-algorithm sha256 \
+    --checksum-sha256 $(openssl dgst -binary -sha256 <path_to_deployment_archive> | openssl base64)
+```
+
+To check the SHA256 checksum of a given source code zip archive after uploading:
+
+```console
+aws s3api get-object-attributes \
+    --bucket <bucket> \
+    --key <object_key> \
+    --object-attributes Checksum
+```
+
 ## Example
 
 ### [HTTP][http-api]
@@ -145,6 +167,7 @@ wscat --connect https://<api_id>.execute-api.us-west-1.amazonaws.com/v0/
 [API Gateway]: https://aws.amazon.com/api-gateway
 [ARN]: https://docs.aws.amazon.com/IAM/latest/UserGuide/reference-arns.html
 [AWS]: https://aws.amazon.com/
+[AWS CLI]: https://aws.amazon.com/cli/
 [CloudWatch]: https://aws.amazon.com/cloudwatch/
 [http-api]: https://docs.aws.amazon.com/apigateway/latest/developerguide/http-api.html
 [IAM]: https://aws.amazon.com/iam/
