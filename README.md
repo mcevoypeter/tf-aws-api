@@ -52,11 +52,12 @@ The following use of this module creates an [HTTP API][http-api] named `example_
 
 ```terraform
 module "http_api" {
-  source        = "git@github.com:mcevoypeter/tf-aws-api.git"
-  region        = "us-east-2"
-  name          = "example_http"
-  protocol_type = "HTTP"
-  stages        = ["v0"]
+  source             = "git@github.com:mcevoypeter/tf-aws-api.git"
+  region             = "us-east-2"
+  name               = "example_http"
+  protocol_type      = "HTTP"
+  stages             = ["v0"]
+  handlers_s3_bucket = "api-route-handlers"
   routes = [
     {
       route_key       = "POST /user"
@@ -101,11 +102,12 @@ The following use of this module creates a [WebSocket API][ws-api] named `exampl
 
 ```terraform
 module "ws_api" {
-  source        = "git@github.com:mcevoypeter/tf-aws-api.git"
-  region        = "us-west-1"
-  name          = "example_ws"
-  protocol_type = "WEBSOCKET"
-  stages        = ["v0", "v1"]
+  source             = "git@github.com:mcevoypeter/tf-aws-api.git"
+  region             = "us-west-1"
+  name               = "example_ws"
+  protocol_type      = "WEBSOCKET"
+  stages             = ["v0", "v1"]
+  handlers_s3_bucket = "api-route-handlers"
   routes = [
     {
       key             = "$default"
