@@ -8,9 +8,22 @@ variable "protocol_type" {
   type        = string
 }
 
-variable "stages" {
-  description = "Stage names. Each must be between 1 and 128 characters in length."
-  type        = set(string)
+variable "routes" {
+  description = <<EOT
+Map from route key to route handler name suffix.
+
+A valid HTTP route key is of the form `<http_method> <path>` i.e. `GET /a/{id}`.
+A valid WebSocket route key is of the form `<action>` i.e. `update`. For more on
+HTTP route keys, see
+https://docs.aws.amazon.com/apigateway/latest/developerguide/http-api-develop-routes.html.
+For more on WebSocket route keys, see
+https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-websocket-api-routes-integrations.html.
+
+A route handler name suffix is the suffix all route handlers that handle
+a given route key end with. A single Lambda function's name is of the form
+`<api_stage>-<function_name>`.
+EOT
+  type        = map(string)
 }
 
 variable "handlers_s3_bucket" {
@@ -18,37 +31,30 @@ variable "handlers_s3_bucket" {
   type        = string
 }
 
-variable "routes" {
-  description = "API routes"
-  type = set(object({
-    # Route key. A valid HTTP route key is of the form `<http_method> <path>`
-    # i.e. `GET /a/{id}`. A valid WebSocket route key is of the form `<action>`
-    # i.e. `update`. For more on HTTP route keys, see
-    # https://docs.aws.amazon.com/apigateway/latest/developerguide/http-api-develop-routes.html.
-    # For more on WebSocket route keys, see
-    # https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-websocket-api-routes-integrations.html.
-    route_key = string
-    # Key of Lambda route handler in functions_s3_bucket. See
+variable "stages" {
+  description = <<EOT
+Map from stage name to a stage's route handlers.
+
+A valid stage name must be between 1 and 128 characters in length.
+
+A stage's route handlers is a map from route key to route handler. A route
+key's route handler specifies its source and the policies it needs to
+operate. All route keys listed in a stage's route handlers' map must also
+be defined in `var.routes`.
+EOT
+  type = map(map(object({
+    # Source of route handler zip archive in `var.handlers_s3_bucket`. See
     # https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_function#s3_key.
     s3_key = string
-    # Name of Lambda route handler created from s3_key. The function entrypoint
-    # MUST be named `handler`.
-    function_name = string
-    # Runtime of Lambda route handler. See
+    # Runtime of route handler. See
     # https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_function#runtime.
     runtime = string
-    # Handler name. For JavaScript and TypeScript handlers, this is
-    # `<module>.<handler>` i.e. `example.handler` for a handler named `handler`
-    # defined in a file `example.ts`.
-    handler = string
-    # Format of the payload sent to the Lambda route handler. Must be either `1.0`
-    # or `2.0` for HTTP APIs and `1.0` for WebSocket APIs (see
-    # https://github.com/hashicorp/terraform-provider-aws/issues/25280).
-    payload_format_version = string
-    # ARNs of permission policies to grant to the Lambda route handler.
+    # Function entrypoint.
+    entrypoint = string
+    # ARNs of permission policies to grant to the route handler.
     policy_arns = list(string)
-    # Inline policies to grant to the Lambda route handler. See
+    # Inline policies to grant to the route handler. See
     # https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role#inline_policy.
     inline_policies = set(object({ name = string, policy = string }))
-  }))
+  })))
 }

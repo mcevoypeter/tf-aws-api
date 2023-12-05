@@ -9,12 +9,28 @@ data "aws_iam_policy_document" "lambda_assume_role" {
   }
 }
 
+locals {
+  route_handlers = flatten([
+    for stage_name, route_handlers in var.stages : [
+      for route_key, route_handler in route_handlers : {
+        function_name   = "${stage_name}-${var.routes[route_key]}"
+        route_key       = route_key
+        s3_key          = route_handler.s3_key
+        runtime         = route_handler.runtime
+        entrypoint      = route_handler.entrypoint
+        policy_arns     = route_handler.policy_arns
+        inline_policies = route_handler.inline_policies
+      }
+    ]
+  ])
+}
+
 resource "aws_iam_role" "this" {
   for_each = {
-    for idx, route in var.routes : route.route_key => route
+    for route_handler in local.route_handlers : route_handler.function_name => route_handler
   }
 
-  name               = "Lambda-${each.value.function_name}"
+  name               = "Lambda-${each.key}"
   assume_role_policy = data.aws_iam_policy_document.lambda_assume_role.json
   managed_policy_arns = concat([
     # permissions required to invoke the function
@@ -54,7 +70,7 @@ resource "aws_iam_role" "this" {
 
 data "aws_s3_object" "this" {
   for_each = {
-    for idx, route in var.routes : route.route_key => route
+    for route_handler in local.route_handlers : route_handler.function_name => route_handler
   }
 
   bucket        = var.handlers_s3_bucket
@@ -64,47 +80,44 @@ data "aws_s3_object" "this" {
 
 resource "aws_lambda_function" "this" {
   for_each = {
-    for idx, route in var.routes : route.route_key => route
+    for route_handler in local.route_handlers : route_handler.function_name => route_handler
   }
 
   s3_bucket        = var.handlers_s3_bucket
   s3_key           = each.value.s3_key
-  function_name    = each.value.function_name
+  function_name    = each.key
   runtime          = each.value.runtime
-  handler          = each.value.handler
+  handler          = each.value.entrypoint
   source_code_hash = data.aws_s3_object.this[each.key].checksum_sha256
   role             = aws_iam_role.this[each.key].arn
 }
 
 resource "aws_lambda_permission" "apigw_trigger" {
   for_each = {
-    for idx, route in var.routes : route.route_key => route
+    for route_handler in local.route_handlers : route_handler.function_name => route_handler
   }
 
   statement_id  = "AllowExecutionFromAPIGateway-${var.name}"
   action        = "lambda:InvokeFunction"
-  function_name = each.value.function_name
+  function_name = each.key
   principal     = "apigateway.amazonaws.com"
   source_arn    = "${aws_apigatewayv2_api.this.execution_arn}/*"
 }
 
 resource "aws_apigatewayv2_integration" "this" {
-  for_each = {
-    for idx, route in var.routes : route.route_key => route
-  }
+  for_each = var.routes
 
   api_id = aws_apigatewayv2_api.this.id
   # see https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-api-integration-types.html
-  integration_type       = "AWS_PROXY"
-  connection_type        = "INTERNET"
-  integration_uri        = aws_lambda_function.this[each.key].invoke_arn
-  payload_format_version = each.value.payload_format_version
+  integration_type = "AWS_PROXY"
+  connection_type  = "INTERNET"
+  # see https://stackoverflow.com/a/68912233
+  integration_uri        = "arn:aws:lambda:${local.region}:${local.account_id}:function:$${stageVariables.stage}-${each.value}"
+  payload_format_version = local.is_ws ? "1.0" : "2.0"
 }
 
 resource "aws_apigatewayv2_route" "this" {
-  for_each = {
-    for idx, route in var.routes : route.route_key => route
-  }
+  for_each = var.routes
 
   api_id    = aws_apigatewayv2_api.this.id
   route_key = each.key

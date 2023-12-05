@@ -44,6 +44,10 @@ See [`variables.tf`](variables.tf).
 
 See [`output.tf`](output.tf).
 
+## Payload Formats
+
+[HTTP APIs][http-api] use payload format version 2.0 whereas [WebSocket APIs][ws-api] use payload format version 1.0. See this [GitHub issue](https://github.com/hashicorp/terraform-provider-aws/issues/25280) and the [AWS docs](https://docs.aws.amazon.com/apigateway/latest/developerguide/http-api-develop-integrations-lambda.html#http-api-develop-integrations) for more information.
+
 ## Deploying Source Code Zip Archives
 
 When uploading a source code zip archive to the [S3] bucket that hosts the API's route handlers, the SHA256 checksum of the zip archive **must** be supplied so that [Terraform] can properly track changes made to each route handlers source code and redeploy the corresponding [Lambda]s as necessary. To do so, use the [`aws s3api put-object`](https://docs.aws.amazon.com/AmazonS3/latest/userguide/checking-object-integrity.html) of the [AWS CLI]:
@@ -70,7 +74,7 @@ aws s3api get-object-attributes \
 
 ### [HTTP][http-api]
 
-The following use of this module creates an [HTTP API][http-api] named `example_http` in `us-east-2` with a single stage `v0` and three routes, each connected to a separate [Lambda] function.
+The following use of this module creates an [HTTP API][http-api] named `example_http` in `us-east-2` with two stages `v0` and `v1` and a single route `GET /example`.
 
 ```terraform
 module "http_api" {
@@ -78,49 +82,46 @@ module "http_api" {
   region             = "us-east-2"
   name               = "example_http"
   protocol_type      = "HTTP"
-  stages             = ["v0"]
+  routes             = {
+    "GET /example" = "http-example"
+  }
   handlers_s3_bucket = "api-route-handlers"
-  routes = [
-    {
-      route_key       = "POST /user"
-      s3_key          = "add-user.zip"
-      function_name   = "add-user"
-      runtime         = "nodejs20.x"
-      handler         = "handler"
-      policy_arns     = []
-      inline_policies = []
+  stages = {
+    "v0" = {
+      "GET /example" = {
+        s3_key          = "v0/http/example.zip"
+        runtime         = "provided.al2023"
+        entrypoint      = "main"
+        policy_arns     = []
+        inline_policies = []
+      },
     },
-    {
-      key             = "GET /user/{id}"
-      s3_key          = "get-user.zip"
-      function_name   = "get-user"
-      runtime         = "nodejs20.x"
-      handler         = "handler"
-      policy_arns     = []
-      inline_policies = []
+    "v1" = {
+      "GET /example" = {
+        s3_key          = "v1/http/example.zip"
+        runtime         = "provided.al2023"
+        entrypoint      = "main"
+        policy_arns     = []
+        inline_policies = []
+      },
     },
-    {
-      key             = "DELETE /user/{id}"
-      s3_key          = "remove-user.zip"
-      function_name   = "remove-user"
-      handler         = "handler"
-      runtime         = "nodejs20.x"
-      policy_arns     = []
-      inline_policies = []
-    },
-  ]
+  }
 }
 ```
 
 Once deployed, this API can be invoked via `curl`:
 
 ```console
-curl https://<api_id>.execute-api.us-east-2.amazonaws.com/v0/user/<user_id>
+curl https://<api_id>.execute-api.us-east-2.amazonaws.com/v0/example
+# response from Lambda function sourced from s3://api-route-handlers/v0/http/example.zip
+
+curl https://<api_id>.execute-api.us-east-2.amazonaws.com/v1/example
+# response from Lambda function sourced from s3://api-route-handlers/v1/http/example.zip
 ```
 
 ### [WebSocket][ws-api]
 
-The following use of this module creates a [WebSocket API][ws-api] named `example_ws` in `us-west-1` with stages (`v0` and `v1`) and routes `$default` (the default route) and `info`, each connected to a single [Lambda] function.
+The following use of this module creates a [WebSocket API][ws-api] named `example_ws` in `us-west-1` with stages `v0` and `v1` and a single route `example`.
 
 ```terraform
 module "ws_api" {
@@ -128,29 +129,30 @@ module "ws_api" {
   region             = "us-west-1"
   name               = "example_ws"
   protocol_type      = "WEBSOCKET"
-  stages             = ["v0", "v1"]
+  routes             = {
+    "example" = "ws-example"
+  }
   handlers_s3_bucket = "api-route-handlers"
-  routes = [
-    {
-      key             = "$default"
-      s3_key          = "default-handler.zip"
-      function_name   = "default-handler"
-      runtime         = "nodejs20.x"
-      handler         = "default-handler.handler"
-      policy_arns     = []
-      inline_policies = []
+  stages = {
+    "v0" = {
+      "example" = {
+        s3_key          = v0/ws/example.zip"
+        runtime         = "provided.al2023"
+        entrypoint      = "main"
+        policy_arns     = []
+        inline_policies = []
+      },
     },
-    {
-      key             = "info"
-      s3_key          = "info-handler.zip"
-      function_name   = "info-handler"
-      runtime         = "nodejs20.x"
-      handler         = "info-handler.handler"
-      policy_arns     = []
-      inline_policies = []
+    "v1" = {
+      "example" = {
+        s3_key          = v1/ws/example.zip"
+        runtime         = "provided.al2023"
+        entrypoint      = "main"
+        policy_arns     = []
+        inline_policies = []
+      },
     },
-  ]
-
+  }
 }
 ```
 
@@ -158,10 +160,12 @@ Once deployed, this API can be invoked via [`wscat`](https://github.com/websocke
 
 ```console
 wscat --connect https://<api_id>.execute-api.us-west-1.amazonaws.com/v0/
-> { "action": "$default" }
-<response from default-handler>
-> { "action": "info" }
-<response form info-handler>
+> { "action": "example" }
+<response from Lambda function sourced from s3://api-route-handlers/v0/ws/example.zip>
+
+wscat --connect https://<api_id>.execute-api.us-west-1.amazonaws.com/v1/
+> { "action": "example" }
+<response from Lambda function sourced from s3://api-route-handlers/v1/ws/example.zip>
 ```
 
 [API Gateway]: https://aws.amazon.com/api-gateway
