@@ -21,7 +21,7 @@ resource "aws_apigatewayv2_stage" "this" {
   name          = each.key
   deployment_id = aws_apigatewayv2_deployment.this[each.key].id
   default_route_settings {
-    logging_level          = "INFO"
+    logging_level          = local.is_ws ? "INFO" : null
     throttling_burst_limit = 5000
     throttling_rate_limit  = 10000
   }
