@@ -102,6 +102,8 @@ resource "aws_lambda_permission" "apigw_trigger" {
   function_name = each.key
   principal     = "apigateway.amazonaws.com"
   source_arn    = "${aws_apigatewayv2_api.this.execution_arn}/*"
+
+  depends_on = [aws_lambda_function.this]
 }
 
 resource "aws_apigatewayv2_integration" "this" {
