@@ -168,6 +168,10 @@ wscat --connect https://<api_id>.execute-api.us-west-1.amazonaws.com/v1/
 <response from Lambda function sourced from s3://api-route-handlers/v1/ws/example.zip>
 ```
 
+## License
+
+This project is licensed under the terms of the [MIT license](https://en.wikipedia.org/wiki/MIT_License).
+
 [API Gateway]: https://aws.amazon.com/api-gateway
 [ARN]: https://docs.aws.amazon.com/IAM/latest/UserGuide/reference-arns.html
 [AWS]: https://aws.amazon.com/
