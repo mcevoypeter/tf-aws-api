@@ -83,7 +83,7 @@ module "http_api" {
   name               = "example_http"
   protocol_type      = "HTTP"
   routes             = {
-    "GET /example" = "http-example"
+    "GET /example" = { name_suffix = "http-example" }
   }
   handlers_s3_bucket = "api-route-handlers"
   stages = {
@@ -130,7 +130,7 @@ module "ws_api" {
   name               = "example_ws"
   protocol_type      = "WEBSOCKET"
   routes             = {
-    "example" = "ws-example"
+    "example" = { name_suffix = "ws-example" }
   }
   handlers_s3_bucket = "api-route-handlers"
   stages = {

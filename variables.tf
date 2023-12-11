@@ -23,7 +23,7 @@ A route handler name suffix is the suffix all route handlers that handle
 a given route key end with. A single Lambda function's name is of the form
 `<api_stage>-<function_name>`.
 EOT
-  type        = map(string)
+  type        = map(object({ name_suffix = string }))
 }
 
 variable "handlers_s3_bucket" {

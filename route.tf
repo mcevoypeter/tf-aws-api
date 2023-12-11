@@ -13,7 +13,7 @@ locals {
   route_handlers = flatten([
     for stage_name, route_handlers in var.stages : [
       for route_key, route_handler in route_handlers : {
-        function_name   = "${stage_name}-${var.routes[route_key]}"
+        function_name   = "${stage_name}-${var.routes[route_key]["name_suffix"]}"
         route_key       = route_key
         s3_key          = route_handler.s3_key
         runtime         = route_handler.runtime
@@ -114,7 +114,7 @@ resource "aws_apigatewayv2_integration" "this" {
   integration_type = "AWS_PROXY"
   connection_type  = "INTERNET"
   # see https://stackoverflow.com/a/68912233
-  integration_uri        = "arn:aws:lambda:${local.region}:${local.account_id}:function:$${stageVariables.stage}-${each.value}"
+  integration_uri        = "arn:aws:lambda:${local.region}:${local.account_id}:function:$${stageVariables.stage}-${each.value["name_suffix"]}"
   payload_format_version = local.is_ws ? "1.0" : "2.0"
 }
 
