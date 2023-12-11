@@ -1,5 +1,7 @@
 # [AWS] [API Gateway]
 
+[![MIT license](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE.txt)
+
 This [Terraform] module creates an [AWS] [API Gateway] API and [AWS] [Lambda]-handled routes.
 
 ## Prequisites
