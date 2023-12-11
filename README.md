@@ -161,10 +161,10 @@ Once deployed, this API can be invoked via `curl`:
 
 ```console
 curl https://<api_id>.execute-api.us-east-2.amazonaws.com/v0/example
-# response from Lambda function sourced from s3://api-route-handlers/v0/http/example.zip
+# response from Lambda function v0-http-example sourced from s3://api-route-handlers/v0/http/example.zip
 
 curl https://<api_id>.execute-api.us-east-2.amazonaws.com/v1/example
-# response from Lambda function sourced from s3://api-route-handlers/v1/http/example.zip
+# response from Lambda function v1-http-example sourced from s3://api-route-handlers/v1/http/example.zip
 ```
 
 ### [WebSocket][ws-api]
@@ -209,11 +209,11 @@ Once deployed, this API can be invoked via [`wscat`](https://github.com/websocke
 ```console
 wscat --connect https://<api_id>.execute-api.us-west-1.amazonaws.com/v0/
 > { "action": "example" }
-<response from Lambda function sourced from s3://api-route-handlers/v0/ws/example.zip>
+<response from Lambda function v0-ws-example sourced from s3://api-route-handlers/v0/ws/example.zip>
 
 wscat --connect https://<api_id>.execute-api.us-west-1.amazonaws.com/v1/
 > { "action": "example" }
-<response from Lambda function sourced from s3://api-route-handlers/v1/ws/example.zip>
+<response from Lambda function v1-ws-example sourced from s3://api-route-handlers/v1/ws/example.zip>
 ```
 
 ## License
