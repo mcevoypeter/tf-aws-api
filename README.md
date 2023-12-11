@@ -92,8 +92,32 @@ module "http_api" {
         s3_key          = "v0/http/example.zip"
         runtime         = "provided.al2023"
         entrypoint      = "main"
-        policy_arns     = []
-        inline_policies = []
+        policy_arns     = ["arn:aws:iam::aws:policy/AmazonS3FullAccess"]
+        inline_policies = [
+          {
+            name = "DynamoDB-BogusTable
+            policy = jsonencode({
+              Version = "2012-10-17"
+              Statement = [
+                {
+                  Action = [
+                    "dynamodb:DeleteItem",
+                    "dynamodb:GetItem",
+                    "dynamodb:PutItem",
+                    "dynamodb:Query",
+                  ]
+                  Effect   = "Allow"
+                  Resource = "arn:aws:dynamodb:*:012345678901:table/BogusTable"
+                },
+                {
+                  Effect   = "Allow"
+                  Action   = ["dynamodb:Query"]
+                  Resource = "arn:aws:dynamodb:*:012345678901:table/BogusTable/index/*"
+                }
+              ]
+            })
+          },
+        ]
       },
     },
     "v1" = {
@@ -101,8 +125,32 @@ module "http_api" {
         s3_key          = "v1/http/example.zip"
         runtime         = "provided.al2023"
         entrypoint      = "main"
-        policy_arns     = []
-        inline_policies = []
+        policy_arns     = ["arn:aws:iam::aws:policy/AmazonS3FullAccess"]
+        inline_policies = [
+          {
+            name = "DynamoDB-BogusTable
+            policy = jsonencode({
+              Version = "2012-10-17"
+              Statement = [
+                {
+                  Action = [
+                    "dynamodb:DeleteItem",
+                    "dynamodb:GetItem",
+                    "dynamodb:PutItem",
+                    "dynamodb:Query",
+                  ]
+                  Effect   = "Allow"
+                  Resource = "arn:aws:dynamodb:*:012345678901:table/BogusTable"
+                },
+                {
+                  Effect   = "Allow"
+                  Action   = ["dynamodb:Query"]
+                  Resource = "arn:aws:dynamodb:*:012345678901:table/BogusTable/index/*"
+                },
+              ]
+            })
+          },
+        ]
       },
     },
   }
@@ -139,7 +187,7 @@ module "ws_api" {
         s3_key          = "v0/ws/example.zip"
         runtime         = "provided.al2023"
         entrypoint      = "main"
-        policy_arns     = []
+        policy_arns     = ["arn:aws:iam::aws:policy/SecretsManagerReadWrite"]
         inline_policies = []
       },
     },
@@ -148,7 +196,7 @@ module "ws_api" {
         s3_key          = "v1/ws/example.zip"
         runtime         = "provided.al2023"
         entrypoint      = "main"
-        policy_arns     = []
+        policy_arns     = ["arn:aws:iam::aws:policy/SecretsManagerReadWrite"]
         inline_policies = []
       },
     },
