@@ -136,7 +136,7 @@ module "ws_api" {
   stages = {
     "v0" = {
       "example" = {
-        s3_key          = v0/ws/example.zip"
+        s3_key          = "v0/ws/example.zip"
         runtime         = "provided.al2023"
         entrypoint      = "main"
         policy_arns     = []
@@ -145,7 +145,7 @@ module "ws_api" {
     },
     "v1" = {
       "example" = {
-        s3_key          = v1/ws/example.zip"
+        s3_key          = "v1/ws/example.zip"
         runtime         = "provided.al2023"
         entrypoint      = "main"
         policy_arns     = []
