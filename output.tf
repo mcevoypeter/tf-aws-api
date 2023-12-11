@@ -64,3 +64,21 @@ output "lambda_fn_names" {
     for fn in aws_lambda_function.this : fn.name
   ]
 }
+
+#
+# aws_apigatewayv2_route resources
+#
+
+output "route_ids" {
+  description = "IDs of API Gateway routes."
+  value = [
+    for route in aws_apigatewayv2_route.this : route.id
+  ]
+}
+
+output "route_keys" {
+  description = "Route keys of API Gateway routes."
+  value = [
+    for route in aws_apigatewayv2_route.this : route.route_key
+  ]
+}
