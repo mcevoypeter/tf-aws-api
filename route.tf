@@ -42,22 +42,25 @@ resource "aws_iam_role" "this" {
   # that use `@connections` callbacks (see
   # https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-how-to-call-websocket-api-connections.html)
   # to send responses to conncted clients.
-  inline_policy {
-    name = "ExecuteAPIFullAccess"
-    policy = jsonencode({
-      Version = "2012-10-17"
-      Statement = [
-        {
-          Effect = "Allow"
-          Action = [
-            "execute-api:Invoke",
-            "execute-api:ManageConnections",
-            "execute-api:InvalidateCache",
-          ],
-          Resource = "${aws_apigatewayv2_api.this.execution_arn}/*"
-        }
-      ]
-    })
+  dynamic "inline_policy" {
+    for_each = local.is_ws ? [null] : []
+    content {
+      name = "ExecuteAPIFullAccess"
+      policy = jsonencode({
+        Version = "2012-10-17"
+        Statement = [
+          {
+            Effect = "Allow"
+            Action = [
+              "execute-api:Invoke",
+              "execute-api:ManageConnections",
+              "execute-api:InvalidateCache",
+            ],
+            Resource = "${aws_apigatewayv2_api.this.execution_arn}/*"
+          }
+        ]
+      })
+    }
   }
   dynamic "inline_policy" {
     for_each = each.value.inline_policies
