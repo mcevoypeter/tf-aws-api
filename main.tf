@@ -42,7 +42,7 @@ resource "aws_apigatewayv2_deployment" "this" {
     redeployment = sha1(jsonencode([for route_key, route_handler in each.value : [
       aws_apigatewayv2_integration.this[route_key],
       aws_apigatewayv2_route.this[route_key],
-      aws_lambda_function.this["${each.key}-${var.routes[route_key]}"],
+      aws_lambda_function.this["${each.key}-${var.routes[route_key]["name_suffix"]}"],
     ]]))
   }
 
