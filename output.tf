@@ -1,3 +1,7 @@
+#
+# aws_apigatewayv2_api resource
+#
+
 output "api_id" {
   description = "ID of API"
   value       = aws_apigatewayv2_api.this.id
@@ -17,6 +21,10 @@ output "api_execution_arn" {
   description = "See https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/apigatewayv2_api#execution_arn"
   value       = aws_apigatewayv2_api.this.execution_arn
 }
+
+#
+# aws_iam_role resources
+#
 
 output "lambda_role_ids" {
   description = "IDs of Lambda IAM roles."
