@@ -46,3 +46,21 @@ output "lambda_role_names" {
     for role in aws_iam_role.this : role.name
   ]
 }
+
+#
+# aws_lambda_function resources
+#
+
+output "lambda_fn_arns" {
+  description = "ARNs of Lambda functions."
+  value = [
+    for fn in aws_lambda_function.this : fn.arn
+  ]
+}
+
+output "lambda_fn_names" {
+  description = "Names of Lambda functions."
+  value = [
+    for fn in aws_lambda_function.this : fn.name
+  ]
+}
