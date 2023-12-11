@@ -61,7 +61,7 @@ output "lambda_fn_arns" {
 output "lambda_fn_names" {
   description = "Names of Lambda functions."
   value = [
-    for fn in aws_lambda_function.this : fn.name
+    for fn in aws_lambda_function.this : fn.function_name
   ]
 }
 
