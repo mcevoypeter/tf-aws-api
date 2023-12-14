@@ -27,23 +27,23 @@ output "api_execution_arn" {
 #
 
 output "lambda_role_ids" {
-  description = "IDs of Lambda IAM roles."
+  description = "IDs of Lambda route handler IAM roles."
   value = [
-    for role in aws_iam_role.this : role.id
+    for role in aws_iam_role.route_handler : role.id
   ]
 }
 
 output "lambda_role_arns" {
-  description = "ARNs of Lambda IAM roles."
+  description = "ARNs of Lambda route handler IAM roles."
   value = [
-    for role in aws_iam_role.this : role.arn
+    for role in aws_iam_role.route_handler : role.arn
   ]
 }
 
 output "lambda_role_names" {
-  description = "Names of Lambda IAM roles."
+  description = "Names of Lambda route handler IAM roles."
   value = [
-    for role in aws_iam_role.this : role.name
+    for role in aws_iam_role.route_handler : role.name
   ]
 }
 
@@ -52,16 +52,16 @@ output "lambda_role_names" {
 #
 
 output "lambda_fn_arns" {
-  description = "ARNs of Lambda functions."
+  description = "ARNs of Lambda route handler functions."
   value = [
-    for fn in aws_lambda_function.this : fn.arn
+    for fn in aws_lambda_function.route_handler : fn.arn
   ]
 }
 
 output "lambda_fn_names" {
-  description = "Names of Lambda functions."
+  description = "Names of Lambda route handler functions."
   value = [
-    for fn in aws_lambda_function.this : fn.function_name
+    for fn in aws_lambda_function.route_handler : fn.function_name
   ]
 }
 

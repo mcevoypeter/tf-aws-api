@@ -1,4 +1,4 @@
-resource "aws_iam_role" "this" {
+resource "aws_iam_role" "route_handler" {
   for_each = {
     for route_handler in local.route_handlers : route_handler.s3_key => route_handler
   }
@@ -54,7 +54,7 @@ data "aws_s3_object" "this" {
   checksum_mode = "ENABLED"
 }
 
-resource "aws_lambda_function" "this" {
+resource "aws_lambda_function" "route_handler" {
   for_each = {
     for route_handler in local.route_handlers : route_handler.s3_key => route_handler
   }
@@ -75,7 +75,7 @@ resource "aws_lambda_function" "this" {
   runtime          = each.value.runtime
   handler          = each.value.entrypoint
   source_code_hash = data.aws_s3_object.this[each.value.s3_key].checksum_sha256
-  role             = aws_iam_role.this[each.value.s3_key].arn
+  role             = aws_iam_role.route_handler[each.value.s3_key].arn
 }
 
 resource "aws_lambda_permission" "apigw_trigger" {
@@ -89,7 +89,7 @@ resource "aws_lambda_permission" "apigw_trigger" {
     aws_apigatewayv2_api.this.id,
   )
   action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.this[each.key].function_name
+  function_name = aws_lambda_function.route_handler[each.key].function_name
   principal     = "apigateway.amazonaws.com"
   source_arn    = "${aws_apigatewayv2_api.this.execution_arn}/*"
 }
@@ -108,7 +108,7 @@ resource "aws_apigatewayv2_integration" "this" {
     local.account_id,
     local.is_ws ? "ws" : "http",
     aws_apigatewayv2_api.this.id,
-    # This needs to match the replace() call in the aws_lambda_function.this resource.
+    # This needs to match the replace() call in the aws_lambda_function.route_handler resource.
     replace(each.value, local.key_regex, "-"),
   )
   payload_format_version = local.is_ws ? "1.0" : "2.0"
