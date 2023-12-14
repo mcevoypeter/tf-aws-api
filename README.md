@@ -89,7 +89,7 @@ module "http_api" {
     "v0" = [
       {
         route_key   = "GET /example"
-        s3_key      = "v0/http/example.zip"
+        s3_key      = "http/v0/example.zip"
         runtime     = "provided.al2023"
         entrypoint  = "main"
         policy_arns = ["arn:aws:iam::aws:policy/AmazonS3FullAccess"]
@@ -123,7 +123,7 @@ module "http_api" {
     "v1" = [
       {
         route_key   = "GET /example"
-        s3_key      = "v1/http/example.zip"
+        s3_key      = "http/v1/example.zip"
         runtime     = "provided.al2023"
         entrypoint  = "main"
         policy_arns = ["arn:aws:iam::aws:policy/AmazonS3FullAccess"]
@@ -162,15 +162,15 @@ Once deployed, this API can be invoked via `curl`:
 
 ```console
 curl https://<api_id>.execute-api.us-east-2.amazonaws.com/v0/example
-# response from Lambda function v0-http-example sourced from s3://api-route-handlers/v0/http/example.zip
+# response from Lambda function v0-http-example sourced from s3://api-route-handlers/http/v0/example.zip
 
 curl https://<api_id>.execute-api.us-east-2.amazonaws.com/v1/example
-# response from Lambda function v1-http-example sourced from s3://api-route-handlers/v1/http/example.zip
+# response from Lambda function v1-http-example sourced from s3://api-route-handlers/http/v1/example.zip
 ```
 
 ### [WebSocket][ws-api]
 
-The following use of this module creates a [WebSocket API][ws-api] named `example_ws` in `us-west-1` with stages `v0` and `v1` and a single route `example` authorized by an [request authorizer](https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-use-lambda-authorizer.html#api-gateway-lambda-authorizer-lambda-function-create) defined in `authorizer.js` of the zip archive at `s3://api-route-handlers/authorizer/example_ws.zip`:
+The following use of this module creates a [WebSocket API][ws-api] named `example_ws` in `us-west-1` with stages `v0` and `v1` and a single route `example` authorized by a [request authorizer](https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-use-lambda-authorizer.html#api-gateway-lambda-authorizer-lambda-function-create) defined in `bootstrap` of the zip archive at `s3://api-route-handlers/ws/authorizer.zip`:
 
 ```terraform
 module "ws_api" {
@@ -181,15 +181,15 @@ module "ws_api" {
   handlers_s3_bucket = "api-route-handlers"
   authorizer = {
     type       = "REQUEST",
-    s3_key     = "authorizer/example_ws.zip",
-    runtime    = "nodejs20.x",
-    entrypoint = "authorizer.handler",
+    s3_key     = "ws/authorizer.zip",
+    runtime    = "provided.al2023",
+    entrypoint = "main",
   }
   stages = {
     "v0" = [
       {
         route_key       = "example"
-        s3_key          = "v0/ws/example.zip"
+        s3_key          = "ws/v0/example.zip"
         runtime         = "provided.al2023"
         entrypoint      = "main"
         policy_arns     = ["arn:aws:iam::aws:policy/SecretsManagerReadWrite"]
@@ -199,7 +199,7 @@ module "ws_api" {
     "v1" = [
       {
         route_key       = "example"
-        s3_key          = "v1/ws/example.zip"
+        s3_key          = "ws/v1/example.zip"
         runtime         = "provided.al2023"
         entrypoint      = "main"
         policy_arns     = ["arn:aws:iam::aws:policy/SecretsManagerReadWrite"]
@@ -215,11 +215,11 @@ Once deployed, this API can be invoked via [`wscat`](https://github.com/websocke
 ```console
 wscat --connect https://<api_id>.execute-api.us-west-1.amazonaws.com/v0/
 > { "action": "example" }
-<response from Lambda function v0-ws-example sourced from s3://api-route-handlers/v0/ws/example.zip>
+<response from Lambda function sourced from s3://api-route-handlers/ws/v0/example.zip>
 
 wscat --connect https://<api_id>.execute-api.us-west-1.amazonaws.com/v1/
 > { "action": "example" }
-<response from Lambda function v1-ws-example sourced from s3://api-route-handlers/v1/ws/example.zip>
+<response from Lambda function sourced from s3://api-route-handlers/ws/v1/example.zip>
 ```
 
 ## License
