@@ -1,84 +1,40 @@
-#
-# aws_apigatewayv2_api resource
-#
-
-output "api_id" {
-  description = "ID of API."
-  value       = aws_apigatewayv2_api.this.id
+output "api" {
+  description = "API Gateway API"
+  value = {
+    id            = aws_apigatewayv2_api.this.id,
+    arn           = aws_apigatewayv2_api.this.arn,
+    endpoint      = aws_apigatewayv2_api.this.api_endpoint,
+    execution_arn = aws_apigatewayv2_api.this.execution_arn,
+  }
 }
 
-output "api_arn" {
-  description = "ARN of API."
-  value       = aws_apigatewayv2_api.this.arn
-}
-
-output "api_endpoint" {
-  description = "URI of API."
-  value       = aws_apigatewayv2_api.this.api_endpoint
-}
-
-output "api_execution_arn" {
-  description = "See https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/apigatewayv2_api#execution_arn."
-  value       = aws_apigatewayv2_api.this.execution_arn
-}
-
-#
-# aws_iam_role resources
-#
-
-output "lambda_role_ids" {
-  description = "IDs of Lambda route handler IAM roles."
+output "route_handler_iam_roles" {
+  description = "IAM roles for the Lambda route handlers."
   value = [
-    for role in aws_iam_role.route_handler : role.id
+    for role in aws_iam_role.route_handler : {
+      id   = role.id,
+      arn  = role.arn,
+      name = role.name,
+    }
   ]
 }
 
-output "lambda_role_arns" {
-  description = "ARNs of Lambda route handler IAM roles."
+output "route_handler_fns" {
+  description = "Lambda route handler functions."
   value = [
-    for role in aws_iam_role.route_handler : role.arn
+    for fn in aws_lambda_function.route_handler : {
+      arn  = fn.arn,
+      name = fn.function_name,
+    }
   ]
 }
 
-output "lambda_role_names" {
-  description = "Names of Lambda route handler IAM roles."
+output "routes" {
+  description = "API Gateway routes."
   value = [
-    for role in aws_iam_role.route_handler : role.name
-  ]
-}
-
-#
-# aws_lambda_function resources
-#
-
-output "lambda_fn_arns" {
-  description = "ARNs of Lambda route handler functions."
-  value = [
-    for fn in aws_lambda_function.route_handler : fn.arn
-  ]
-}
-
-output "lambda_fn_names" {
-  description = "Names of Lambda route handler functions."
-  value = [
-    for fn in aws_lambda_function.route_handler : fn.function_name
-  ]
-}
-
-#
-# aws_apigatewayv2_route resources
-#
-
-output "route_ids" {
-  description = "IDs of API Gateway routes."
-  value = [
-    for route in aws_apigatewayv2_route.this : route.id
-  ]
-}
-
-output "route_keys" {
-  description = "Route keys of API Gateway routes."
-  value = [
-    for route in aws_apigatewayv2_route.this : route.route_key
+    for route in aws_apigatewayv2_route.this : {
+      id        = route.id,
+      route_key = route.route_key,
+    }
   ]
 }
