@@ -1,14 +1,3 @@
-data "aws_iam_policy_document" "lambda_assume_role" {
-  statement {
-    effect = "Allow"
-    principals {
-      type        = "Service"
-      identifiers = ["lambda.amazonaws.com"]
-    }
-    actions = ["sts:AssumeRole"]
-  }
-}
-
 locals {
   route_handlers = flatten([
     for stage_name, route_handlers in var.stages : [
@@ -127,4 +116,7 @@ resource "aws_apigatewayv2_route" "this" {
   api_id    = aws_apigatewayv2_api.this.id
   route_key = each.key
   target    = "integrations/${aws_apigatewayv2_integration.this[each.key].id}"
+  # Lambda authorizers can only be used on HTTP routes or the WebSocket $connect route.
+  authorization_type = var.authorizer == null || (local.is_ws && each.key != "$connect") ? "NONE" : "CUSTOM"
+  authorizer_id      = var.authorizer == null || (local.is_ws && each.key != "$connect") ? null : aws_apigatewayv2_authorizer.this[0].id
 }

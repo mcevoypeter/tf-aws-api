@@ -171,18 +171,24 @@ curl https://<api_id>.execute-api.us-east-2.amazonaws.com/v1/example
 
 ### [WebSocket][ws-api]
 
-The following use of this module creates a [WebSocket API][ws-api] named `example_ws` in `us-west-1` with stages `v0` and `v1` and a single route `example`.
+The following use of this module creates a [WebSocket API][ws-api] named `example_ws` in `us-west-1` with stages `v0` and `v1` and a single route `example` authorized by an [request authorizer](https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-use-lambda-authorizer.html#api-gateway-lambda-authorizer-lambda-function-create) defined in `authorizer.js` of the zip archive at `s3://api-route-handlers/authorizer/example_ws.zip`:
 
 ```terraform
 module "ws_api" {
-  source             = "git@github.com:mcevoypeter/tf-aws-api.git"
-  region             = "us-west-1"
-  name               = "example_ws"
-  protocol_type      = "WEBSOCKET"
-  routes             = {
+  source        = "git@github.com:mcevoypeter/tf-aws-api.git"
+  region        = "us-west-1"
+  name          = "example_ws"
+  protocol_type = "WEBSOCKET"
+  routes = {
     "example" = { name_suffix = "ws-example" }
   }
   handlers_s3_bucket = "api-route-handlers"
+  authorizer = {
+    type       = "REQUEST",
+    s3_key     = "authorizer/example_ws.zip",
+    runtime    = "nodejs20.x",
+    entrypoint = "authorizer.handler",
+  }
   stages = {
     "v0" = {
       "example" = {

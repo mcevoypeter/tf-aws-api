@@ -50,3 +50,15 @@ resource "aws_apigatewayv2_deployment" "this" {
     create_before_destroy = true
   }
 }
+
+data "aws_iam_policy_document" "lambda_assume_role" {
+  statement {
+    effect = "Allow"
+    principals {
+      type        = "Service"
+      identifiers = ["lambda.amazonaws.com"]
+    }
+    actions = ["sts:AssumeRole"]
+  }
+}
+

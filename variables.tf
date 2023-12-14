@@ -31,6 +31,21 @@ variable "handlers_s3_bucket" {
   type        = string
 }
 
+variable "authorizer" {
+  description = "Lambda authorizer sourced from `var.handlers_s3_bucket`."
+  type = object({
+    # The authorizer type. Either `TOKEN` or `REQUEST`.
+    type = string,
+    # Source of the authorizer zip archive in `var.handlers_s3_bucket`.
+    s3_key = string,
+    # Runtime of the authorizer.
+    runtime = string,
+    # Function entrypoint.
+    entrypoint = string,
+  })
+  default = null
+}
+
 variable "stages" {
   description = <<EOT
 Map from stage name to a stage's route handlers.
