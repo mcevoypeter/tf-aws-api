@@ -1,5 +1,9 @@
 locals {
-  authorizer_name = "${aws_apigatewayv2_api.this.id}-api-authorizer"
+  authorizer_name = format(
+    "%s-%s-api-authorizer",
+    local.is_ws ? "ws" : "http",
+    aws_apigatewayv2_api.this.id,
+  )
 }
 
 resource "aws_iam_role" "authorizer" {
