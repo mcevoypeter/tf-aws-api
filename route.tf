@@ -1,25 +1,9 @@
-locals {
-  route_handlers = flatten([
-    for stage_name, route_handlers in var.stages : [
-      for route_key, route_handler in route_handlers : {
-        function_name   = "${stage_name}-${var.routes[route_key]["name_suffix"]}"
-        route_key       = route_key
-        s3_key          = route_handler.s3_key
-        runtime         = route_handler.runtime
-        entrypoint      = route_handler.entrypoint
-        policy_arns     = route_handler.policy_arns
-        inline_policies = route_handler.inline_policies
-      }
-    ]
-  ])
-}
-
 resource "aws_iam_role" "this" {
   for_each = {
-    for route_handler in local.route_handlers : route_handler.function_name => route_handler
+    for route_handler in local.route_handlers : route_handler.s3_key => route_handler
   }
 
-  name               = "Lambda-${each.key}"
+  name               = "Lambda-${replace(each.key, local.key_regex, "-")}"
   assume_role_policy = data.aws_iam_policy_document.lambda_assume_role.json
   managed_policy_arns = concat([
     # permissions required to invoke the function
@@ -62,61 +46,81 @@ resource "aws_iam_role" "this" {
 
 data "aws_s3_object" "this" {
   for_each = {
-    for route_handler in local.route_handlers : route_handler.function_name => route_handler
+    for route_handler in local.route_handlers : route_handler.s3_key => route_handler
   }
 
   bucket        = var.handlers_s3_bucket
-  key           = each.value.s3_key
+  key           = each.key
   checksum_mode = "ENABLED"
 }
 
 resource "aws_lambda_function" "this" {
   for_each = {
-    for route_handler in local.route_handlers : route_handler.function_name => route_handler
+    for route_handler in local.route_handlers : route_handler.s3_key => route_handler
   }
 
-  s3_bucket        = var.handlers_s3_bucket
-  s3_key           = each.value.s3_key
-  function_name    = each.key
+  s3_bucket = var.handlers_s3_bucket
+  s3_key    = each.key
+  # A route handler's Lambda function name is of the form
+  # `<api_id>-<api_type>-<api_stage>-<route_key>`. Note that all whitespace in
+  # the route key is replaced with underscores.
+  function_name = format(
+    "%s-%s-%s-%s",
+    local.is_ws ? "ws" : "http",
+    aws_apigatewayv2_api.this.id,
+    each.value.stage,
+    # This needs to match the replace() call in the aws_apigatewayv2_integration.this resource.
+    replace(each.value.route_key, local.key_regex, "-"),
+  )
   runtime          = each.value.runtime
   handler          = each.value.entrypoint
-  source_code_hash = data.aws_s3_object.this[each.key].checksum_sha256
-  role             = aws_iam_role.this[each.key].arn
+  source_code_hash = data.aws_s3_object.this[each.value.s3_key].checksum_sha256
+  role             = aws_iam_role.this[each.value.s3_key].arn
 }
 
 resource "aws_lambda_permission" "apigw_trigger" {
   for_each = {
-    for route_handler in local.route_handlers : route_handler.function_name => route_handler
+    for route_handler in local.route_handlers : route_handler.s3_key => route_handler
   }
 
-  statement_id  = "AllowExecutionFromAPIGateway-${var.name}"
+  statement_id = format(
+    "AllowExecutionFromAPIGateway-%s-%s",
+    local.is_ws ? "ws" : "http",
+    aws_apigatewayv2_api.this.id,
+  )
   action        = "lambda:InvokeFunction"
-  function_name = each.key
+  function_name = aws_lambda_function.this[each.key].function_name
   principal     = "apigateway.amazonaws.com"
   source_arn    = "${aws_apigatewayv2_api.this.execution_arn}/*"
-
-  depends_on = [aws_lambda_function.this]
 }
 
 resource "aws_apigatewayv2_integration" "this" {
-  for_each = var.routes
+  for_each = local.route_keys
 
   api_id = aws_apigatewayv2_api.this.id
   # see https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-api-integration-types.html
   integration_type = "AWS_PROXY"
   connection_type  = "INTERNET"
   # see https://stackoverflow.com/a/68912233
-  integration_uri        = "arn:aws:lambda:${local.region}:${local.account_id}:function:$${stageVariables.stage}-${each.value["name_suffix"]}"
+  integration_uri = format(
+    "arn:aws:lambda:%s:%s:function:%s-%s-$${stageVariables.stage}-%s",
+    local.region,
+    local.account_id,
+    local.is_ws ? "ws" : "http",
+    aws_apigatewayv2_api.this.id,
+    # This needs to match the replace() call in the aws_lambda_function.this resource.
+    replace(each.value, local.key_regex, "-"),
+  )
   payload_format_version = local.is_ws ? "1.0" : "2.0"
 }
 
 resource "aws_apigatewayv2_route" "this" {
-  for_each = var.routes
+  for_each = local.route_keys
 
   api_id    = aws_apigatewayv2_api.this.id
-  route_key = each.key
-  target    = "integrations/${aws_apigatewayv2_integration.this[each.key].id}"
+  route_key = each.value
+  target    = "integrations/${aws_apigatewayv2_integration.this[each.value].id}"
   # Lambda authorizers can only be used on HTTP routes or the WebSocket $connect route.
-  authorization_type = var.authorizer == null || (local.is_ws && each.key != "$connect") ? "NONE" : "CUSTOM"
-  authorizer_id      = var.authorizer == null || (local.is_ws && each.key != "$connect") ? null : aws_apigatewayv2_authorizer.this[0].id
+  authorization_type = var.authorizer == null || (local.is_ws && each.value != "$connect") ? "NONE" : "CUSTOM"
+  authorizer_id      = var.authorizer == null || (local.is_ws && each.value != "$connect") ? null : aws_apigatewayv2_authorizer.this[0].id
 }

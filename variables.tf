@@ -8,24 +8,6 @@ variable "protocol_type" {
   type        = string
 }
 
-variable "routes" {
-  description = <<EOT
-Map from route key to route handler name suffix.
-
-A valid HTTP route key is of the form `<http_method> <path>` i.e. `GET /a/{id}`.
-A valid WebSocket route key is of the form `<action>` i.e. `update`. For more on
-HTTP route keys, see
-https://docs.aws.amazon.com/apigateway/latest/developerguide/http-api-develop-routes.html.
-For more on WebSocket route keys, see
-https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-websocket-api-routes-integrations.html.
-
-A route handler name suffix is the suffix all route handlers that handle
-a given route key end with. A single Lambda function's name is of the form
-`<api_stage>-<function_name>`.
-EOT
-  type        = map(object({ name_suffix = string }))
-}
-
 variable "handlers_s3_bucket" {
   description = "S3 bucket containing Lambda route handlers"
   type        = string
@@ -57,7 +39,14 @@ key's route handler specifies its source and the policies it needs to
 operate. All route keys listed in a stage's route handlers' map must also
 be defined in `var.routes`.
 EOT
-  type = map(map(object({
+  type = map(set(object({
+    # A valid HTTP route key is of the form `<http_method> <path>` i.e. `GET /a/{id}`.
+    # A valid WebSocket route key is of the form `<action>` i.e. `update`. For more on
+    # HTTP route keys, see
+    # https://docs.aws.amazon.com/apigateway/latest/developerguide/http-api-develop-routes.html.
+    # For more on WebSocket route keys, see
+    # https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-websocket-api-routes-integrations.html.
+    route_key = string
     # Source of route handler zip archive in `var.handlers_s3_bucket`. See
     # https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_function#s3_key.
     s3_key = string

@@ -80,24 +80,22 @@ The following use of this module creates an [HTTP API][http-api] named `example_
 
 ```terraform
 module "http_api" {
-  source             = "git@github.com:mcevoypeter/tf-aws-api.git"
-  region             = "us-east-2"
-  name               = "example_http"
-  protocol_type      = "HTTP"
-  routes             = {
-    "GET /example" = { name_suffix = "http-example" }
-  }
+  source        = "git@github.com:mcevoypeter/tf-aws-api.git"
+  region        = "us-east-2"
+  name          = "example_http"
+  protocol_type = "HTTP"
   handlers_s3_bucket = "api-route-handlers"
   stages = {
-    "v0" = {
-      "GET /example" = {
-        s3_key          = "v0/http/example.zip"
-        runtime         = "provided.al2023"
-        entrypoint      = "main"
-        policy_arns     = ["arn:aws:iam::aws:policy/AmazonS3FullAccess"]
+    "v0" = [
+      {
+        route_key   = "GET /example"
+        s3_key      = "v0/http/example.zip"
+        runtime     = "provided.al2023"
+        entrypoint  = "main"
+        policy_arns = ["arn:aws:iam::aws:policy/AmazonS3FullAccess"]
         inline_policies = [
           {
-            name = "DynamoDB-BogusTable
+            name = "DynamoDB-BogusTable"
             policy = jsonencode({
               Version = "2012-10-17"
               Statement = [
@@ -121,16 +119,17 @@ module "http_api" {
           },
         ]
       },
-    },
-    "v1" = {
-      "GET /example" = {
-        s3_key          = "v1/http/example.zip"
-        runtime         = "provided.al2023"
-        entrypoint      = "main"
-        policy_arns     = ["arn:aws:iam::aws:policy/AmazonS3FullAccess"]
+    ],
+    "v1" = [
+      {
+        route_key   = "GET /example"
+        s3_key      = "v1/http/example.zip"
+        runtime     = "provided.al2023"
+        entrypoint  = "main"
+        policy_arns = ["arn:aws:iam::aws:policy/AmazonS3FullAccess"]
         inline_policies = [
           {
-            name = "DynamoDB-BogusTable
+            name = "DynamoDB-BogusTable"
             policy = jsonencode({
               Version = "2012-10-17"
               Statement = [
@@ -154,7 +153,7 @@ module "http_api" {
           },
         ]
       },
-    },
+    ],
   }
 }
 ```
@@ -179,9 +178,6 @@ module "ws_api" {
   region        = "us-west-1"
   name          = "example_ws"
   protocol_type = "WEBSOCKET"
-  routes = {
-    "example" = { name_suffix = "ws-example" }
-  }
   handlers_s3_bucket = "api-route-handlers"
   authorizer = {
     type       = "REQUEST",
@@ -190,24 +186,26 @@ module "ws_api" {
     entrypoint = "authorizer.handler",
   }
   stages = {
-    "v0" = {
-      "example" = {
+    "v0" = [
+      {
+        route_key       = "example"
         s3_key          = "v0/ws/example.zip"
         runtime         = "provided.al2023"
         entrypoint      = "main"
         policy_arns     = ["arn:aws:iam::aws:policy/SecretsManagerReadWrite"]
         inline_policies = []
       },
-    },
-    "v1" = {
-      "example" = {
+    ],
+    "v1" = [
+      {
+        route_key       = "example"
         s3_key          = "v1/ws/example.zip"
         runtime         = "provided.al2023"
         entrypoint      = "main"
         policy_arns     = ["arn:aws:iam::aws:policy/SecretsManagerReadWrite"]
         inline_policies = []
       },
-    },
+    ],
   }
 }
 ```
