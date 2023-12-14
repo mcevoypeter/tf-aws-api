@@ -48,7 +48,7 @@ See [`output.tf`](output.tf).
 
 ## Payload Formats
 
-[HTTP APIs][http-api] use payload format version 2.0 whereas [WebSocket APIs][ws-api] use payload format version 1.0. See this [GitHub issue](https://github.com/hashicorp/terraform-provider-aws/issues/25280) and the [AWS docs](https://docs.aws.amazon.com/apigateway/latest/developerguide/http-api-develop-integrations-lambda.html#http-api-develop-integrations) for more information.
+[HTTP APIs][http-api] use payload format version 2.0 whereas [WebSocket APIs][ws-api] use payload format version 1.0. This applies for both route handlers and authorizers. See this [GitHub issue](https://github.com/hashicorp/terraform-provider-aws/issues/25280) and the [AWS docs](https://docs.aws.amazon.com/apigateway/latest/developerguide/http-api-develop-integrations-lambda.html#http-api-develop-integrations) for more information.
 
 ## Deploying Source Code Zip Archives
 
