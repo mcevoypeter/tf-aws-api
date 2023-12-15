@@ -62,7 +62,7 @@ resource "aws_apigatewayv2_authorizer" "this" {
   api_id           = aws_apigatewayv2_api.this.id
   authorizer_type  = var.authorizer.type
   authorizer_uri   = aws_lambda_function.authorizer[0].invoke_arn
-  identity_sources = []
+  identity_sources = var.authorizer.identity_sources
   name             = local.authorizer_name
   # This attribute can only be set for HTTP APIs, not WebSocket APIs.
   authorizer_payload_format_version = local.is_ws ? null : "2.0"

@@ -180,10 +180,13 @@ module "ws_api" {
   protocol_type = "WEBSOCKET"
   handlers_s3_bucket = "api-route-handlers"
   authorizer = {
-    type       = "REQUEST",
-    s3_key     = "ws/authorizer.zip",
-    runtime    = "provided.al2023",
-    entrypoint = "main",
+    type             = "REQUEST",
+    s3_key           = "ws/authorizer.zip",
+    runtime          = "provided.al2023",
+    entrypoint       = "main",
+    identity_sources = []
+    policy_arns      = []
+    inline_policies  = []
   }
   stages = {
     "v0" = [

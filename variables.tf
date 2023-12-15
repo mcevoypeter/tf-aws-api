@@ -24,6 +24,8 @@ variable "authorizer" {
     runtime = string,
     # Function entrypoint.
     entrypoint = string,
+    # See https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/apigatewayv2_authorizer#identity_sources.
+    identity_sources = set(string)
     # ARNs of permission policies to grant to the authorizer.
     policy_arns = list(string)
     # Inline policies to grant to the authorizer. See
