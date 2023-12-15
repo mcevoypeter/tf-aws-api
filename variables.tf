@@ -17,13 +17,13 @@ variable "authorizer" {
   description = "Lambda authorizer sourced from `var.handlers_s3_bucket`."
   type = object({
     # The authorizer type. Either `TOKEN` or `REQUEST`.
-    type = string,
+    type = string
     # Source of the authorizer zip archive in `var.handlers_s3_bucket`.
-    s3_key = string,
+    s3_key = string
     # Runtime of the authorizer.
-    runtime = string,
+    runtime = string
     # Function entrypoint.
-    entrypoint = string,
+    entrypoint = string
     # See https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/apigatewayv2_authorizer#identity_sources.
     identity_sources = set(string)
     # ARNs of permission policies to grant to the authorizer.
