@@ -24,6 +24,11 @@ variable "authorizer" {
     runtime = string,
     # Function entrypoint.
     entrypoint = string,
+    # ARNs of permission policies to grant to the authorizer.
+    policy_arns = list(string)
+    # Inline policies to grant to the authorizer. See
+    # https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role#inline_policy.
+    inline_policies = set(object({ name = string, policy = string }))
   })
   default = null
 }

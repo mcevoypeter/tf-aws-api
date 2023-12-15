@@ -11,12 +11,19 @@ resource "aws_iam_role" "authorizer" {
 
   name               = "Lambda-${local.authorizer_name}"
   assume_role_policy = data.aws_iam_policy_document.lambda_assume_role.json
-  managed_policy_arns = [
+  managed_policy_arns = concat([
     # permissions required to invoke the function
     "arn:aws:iam::aws:policy/service-role/AWSLambdaRole",
     # permissions required to write logs to CloudWatch
     "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
-  ]
+  ], var.authorizer.policy_arns)
+  dynamic "inline_policy" {
+    for_each = var.authorizer.inline_policies
+    content {
+      name   = inline_policy.value.name
+      policy = inline_policy.value.policy
+    }
+  }
 }
 
 data "aws_s3_object" "authorizer" {
