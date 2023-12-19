@@ -8,8 +8,8 @@ variable "protocol_type" {
   type        = string
 }
 
-variable "domain" {
-  description = "Custom domain to associate with the API."
+variable "domain_id" {
+  description = "ID of aws_apigatewayv2_domain_name resource to associate with the API."
   type        = string
   default     = null
 }

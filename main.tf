@@ -35,7 +35,7 @@ resource "aws_apigatewayv2_api" "this" {
   route_selection_expression = local.is_ws ? "$request.body.action" : "$request.method $request.path"
   # If the user supplies a custom domain, it'll be usable as an endpoint so
   # there's no need for the execute-api endpoint.
-  disable_execute_api_endpoint = var.domain != null
+  disable_execute_api_endpoint = var.domain_id != null
 }
 
 data "aws_iam_policy_document" "lambda_assume_role" {
