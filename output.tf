@@ -3,7 +3,7 @@ output "api" {
   value = {
     id            = aws_apigatewayv2_api.this.id,
     arn           = aws_apigatewayv2_api.this.arn,
-    endpoint      = var.domain_id != null ? var.domain_id : aws_apigatewayv2_api.this.api_endpoint,
+    endpoint      = var.domain != null ? var.domain : aws_apigatewayv2_api.this.api_endpoint,
     execution_arn = aws_apigatewayv2_api.this.execution_arn,
   }
 }
