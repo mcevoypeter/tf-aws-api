@@ -46,6 +46,12 @@ See [`variables.tf`](variables.tf).
 
 See [`output.tf`](output.tf).
 
+## Custom Domains
+
+To use a custom domain for an API, use the module's `domain` attribute. Under the hood, this will create an [ACM] certificate for the domain. You'll need to create a `CNAME` record in your domain registrar using with the values specified in the `CNAME name` and `CNAME value` columns of the `Domains` section of the domain's certificate in the [ACM] portion of the [AWS] console. The `CNAME name` will be something like `_843f1f5104f54429ae4b16a524440fda.your.domain`. Note that when you enter this into the `CNAME` record in your domain registrar, you may need to omit the base domain. For example, if `CNAME name` is `_843f1f5104f54429ae4b16a524440fda.api.mcevoypeter.com`, you may need to enter simply `_843f1f5104f54429ae4b16a524440fda.api` for the name of the `CNAME` record in your domain registrar.
+
+Once the `terraform apply` succeeds, you'll need to create another `CNAME` record in your domain registrar establishing a mapping between your custom domain name and the [API Gateway] domain name. To find your [API Gateway] domain name, go to `API Gateway > APIs > Custom domain names` in the [AWS] console and look at the `Endpoint configuration` section of the domain in question. As an example, if your custom domain is `api.mcevoypeter.com` and your API's [API Gateway] domain is `https://p-9awexvv0h0.execute-api.us-east-1.amazonaws.com`, your `CNAME` record's name would be `api` and its value would be `https://p-9awexvv0h0.execute-api.us-east-1.amazonaws.com`.
+
 ## Payload Formats
 
 [HTTP APIs][http-api] use payload format version 2.0 whereas [WebSocket APIs][ws-api] use payload format version 1.0. This applies for both route handlers and authorizers. See this [GitHub issue](https://github.com/hashicorp/terraform-provider-aws/issues/25280) and the [AWS docs](https://docs.aws.amazon.com/apigateway/latest/developerguide/http-api-develop-integrations-lambda.html#http-api-develop-integrations) for more information.
@@ -229,6 +235,7 @@ wscat --connect https://<api_id>.execute-api.us-west-1.amazonaws.com/v1/
 
 This project is licensed under the terms of the [MIT license](https://en.wikipedia.org/wiki/MIT_License).
 
+[ACM]: https://aws.amazon.com/certificate-manager/
 [API Gateway]: https://aws.amazon.com/api-gateway
 [ARN]: https://docs.aws.amazon.com/IAM/latest/UserGuide/reference-arns.html
 [AWS]: https://aws.amazon.com/
