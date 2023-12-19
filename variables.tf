@@ -8,6 +8,12 @@ variable "protocol_type" {
   type        = string
 }
 
+variable "domain" {
+  description = "Custom domain to associate with the API."
+  type        = string
+  default     = null
+}
+
 variable "handlers_s3_bucket" {
   description = "S3 bucket containing Lambda route handlers"
   type        = string

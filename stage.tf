@@ -14,6 +14,14 @@ resource "aws_apigatewayv2_stage" "this" {
   }
 }
 
+resource "aws_apigatewayv2_api_mapping" "this" {
+  for_each = var.domain != null ? var.stages : {}
+
+  api_id      = aws_apigatewayv2_api.this.id
+  domain_name = aws_apigatewayv2_domain_name.this[0].id
+  stage       = aws_apigatewayv2_stage.this[each.key].id
+}
+
 resource "aws_apigatewayv2_deployment" "this" {
   for_each = var.stages
 
